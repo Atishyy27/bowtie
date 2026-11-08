@@ -5,13 +5,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ["3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.py }}
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --group=test
+      - name: debug two-field format
+        run: |
+          uv run bowtie filter-dialects --format "{.short_name}: {.pretty_name}"; echo "rc=$?"
+          uv run bowtie filter-dialects --format "{.short_name}"; echo "rc=$?"
       - name: filter-dialects tests (new and existing)
         run: uv run pytest bowtie/tests/test_integration.py -k "filter_dialects" -p no:cacheprovider -q
       - name: lint the changed file

@@ -1147,8 +1147,15 @@ class _DialectFormat(click.ParamType):
             return value
 
         try:
-            _DIALECT_FORMATTER.format(value, Dialect.latest(), dialect=Dialect.latest())
-        except (AttributeError, KeyError, IndexError, ValueError, TypeError) as err:
+            latest = Dialect.latest()
+            _DIALECT_FORMATTER.format(value, latest, dialect=latest)
+        except (
+            AttributeError,
+            KeyError,
+            IndexError,
+            ValueError,
+            TypeError,
+        ) as err:
             self.fail(str(err), param, ctx)
         return value
 
@@ -1830,7 +1837,8 @@ async def filter_dialects(
 
     for dialect in sorted(matching, reverse=True):
         try:
-            click.echo(_DIALECT_FORMATTER.format(format, dialect, dialect=dialect))
+            line = _DIALECT_FORMATTER.format(format, dialect, dialect=dialect)
+            click.echo(line)
         except AttributeError as err:
             raise click.BadParameter(str(err), param_hint="--format")
         except (KeyError, IndexError, ValueError, TypeError) as err:

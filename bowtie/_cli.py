@@ -1116,15 +1116,19 @@ class _Dialect(click.ParamType):
 
 
 class _DialectFormatter(string.Formatter):
-    def get_field(
+    """
+    Format a dialect, where every unnamed field (``{.attr}``) is the dialect.
+    """
+
+    def get_value(
         self,
-        field_name: str,
+        key: int | str,
         args: Sequence[Any],
         kwargs: Mapping[str, Any],
-    ) -> tuple[Any, str]:
-        if field_name.startswith("."):
-            field_name = f"0{field_name}"
-        return super().get_field(field_name, args, kwargs)
+    ) -> Any:
+        if key == "" or isinstance(key, int):
+            return args[0]
+        return super().get_value(key, args, kwargs)
 
 
 _DIALECT_FORMATTER = _DialectFormatter()
